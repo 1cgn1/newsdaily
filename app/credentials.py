@@ -25,6 +25,7 @@ _FILES = {
     "MAIL_TO": "recipient_email",
 }
 _EMAIL_NAMES = {"SMTP_USERNAME", "MAIL_FROM", "MAIL_TO"}
+_UNCONFIGURED_MODEL_CREDENTIAL = "__NEWSDaily_UNCONFIGURED_MODEL_CREDENTIAL__"
 
 
 class CredentialProvider:
@@ -90,6 +91,8 @@ class CredentialProvider:
                 raise
             except (OSError, UnicodeError):
                 raise CredentialError(f"Could not read valid UTF-8 credential file for {name}") from None
+            if value == _UNCONFIGURED_MODEL_CREDENTIAL:
+                raise CredentialError(f"Missing required file credential: {name}")
         if not value or value != value.strip() or "\n" in value or "\r" in value or "\x00" in value:
             raise CredentialError(f"Credential {name} is empty or contains invalid whitespace")
         if name in _EMAIL_NAMES and (value.count("@") != 1 or any(char.isspace() or char in ",;<>" for char in value)):

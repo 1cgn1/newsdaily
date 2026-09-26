@@ -10,3 +10,4 @@ logs/
 *.sqlite3
 credentials/
 secrets/
+/.deployment-access/

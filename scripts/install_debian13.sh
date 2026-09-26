@@ -156,6 +156,7 @@ fi
 "$PROJECT_DIR/.venv/bin/python" -m pip check
 chown -R root:root "$PROJECT_DIR/.venv"
 chmod -R go-w "$PROJECT_DIR/.venv"
+chmod -R go+rX "$PROJECT_DIR/.venv"
 
 install -d -o root -g root -m 0755 /etc/newsdaily
 install -d -o root -g root -m 0700 /etc/newsdaily/credentials

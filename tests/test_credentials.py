@@ -57,6 +57,14 @@ class CredentialProviderTests(unittest.TestCase):
             provider=CredentialProvider(mode="file",environ={"CREDENTIALS_DIRECTORY":directory})
             self.assertFalse(provider.is_configured("OPENAI_API_KEY"))
 
+    def test_systemd_placeholder_cannot_be_used_as_a_model_key(self):
+        with tempfile.TemporaryDirectory(dir=".") as directory:
+            Path(directory, "openai_api_key").write_text("__NEWSDaily_UNCONFIGURED_MODEL_CREDENTIAL__", encoding="utf-8")
+            provider = CredentialProvider(mode="file", environ={"CREDENTIALS_DIRECTORY": directory})
+            self.assertFalse(provider.is_configured("OPENAI_API_KEY"))
+            with self.assertRaisesRegex(CredentialError, "Missing required file credential: OPENAI_API_KEY"):
+                provider.get("OPENAI_API_KEY")
+
     def test_invalid_mode_and_missing_systemd_directory(self):
         with self.assertRaisesRegex(CredentialError, "CREDENTIALS_MODE"):
             CredentialProvider(mode="oci_vault")

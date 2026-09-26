@@ -164,7 +164,7 @@ sudo bash scripts/install_debian13.sh --set-credential sender_email
 sudo bash scripts/install_debian13.sh --set-credential recipient_email
 ```
 
-上述凭据命令只有名称，没有密钥值；脚本会以隐藏输入方式读取并二次确认。不得将秘密放入 shell 参数、环境变量、配置 JSON、`.env`、systemd 单元、数据库、日志、工单或聊天。systemd 使用 `LoadCredential=` 将凭据提供给单次服务进程。root 和 VPS 管理员仍可能读取磁盘凭据，应限制管理员权限并保护备份。
+上述凭据命令只有名称，没有密钥值；脚本会以隐藏输入方式读取并二次确认。不得将秘密放入 shell 参数、环境变量、配置 JSON、`.env`、systemd 单元、数据库、日志、工单或聊天。systemd 使用 `LoadCredential=` 将凭据提供给单次服务进程；未配置的其他模型使用非秘密占位符，程序会明确拒绝把占位符当作 API 密钥。只需录入当前所选模型的密钥，切换模型时需先录入对应密钥并重新执行 `--check`。root 和 VPS 管理员仍可能读取磁盘凭据，应限制管理员权限并保护备份。
 
 下方命令以服务账号幂等初始化数据库、查看状态并进行部署前安全检查。安装脚本的 `--check` 会核对所选模型凭据、邮件凭据、目录/文件权限、依赖和数据库状态；检查结果不显示凭据值：
 
