@@ -1,0 +1,20 @@
+[Unit]
+Description=Rebuild today's reviewed preview after a recipient or SMTP code change
+
+[Service]
+Type=oneshot
+TimeoutStartSec=3min
+User=newsdaily
+Group=newsdaily
+WorkingDirectory=/opt/newsdaily
+EnvironmentFile=/etc/newsdaily/config
+LoadCredential=smtp_auth_code:/etc/newsdaily/credentials/smtp_auth_code
+LoadCredential=sender_email:/etc/newsdaily/credentials/sender_email
+LoadCredential=recipient_email:/etc/newsdaily/credentials/recipient_email
+ExecStart=/opt/newsdaily/.venv/bin/python -B -m app.cli rebuild-preview
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=strict
+ReadWritePaths=/opt/newsdaily/data /opt/newsdaily/output
+UMask=0077

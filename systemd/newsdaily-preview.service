@@ -1,0 +1,29 @@
+[Unit]
+Description=Cross-media news daily preview (never sends email)
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+TimeoutStartSec=45min
+User=newsdaily
+Group=newsdaily
+WorkingDirectory=/opt/newsdaily
+EnvironmentFile=/etc/newsdaily/config
+Environment=PYTHONUNBUFFERED=1
+SetCredential=deepseek_api_key:
+SetCredential=openai_api_key:
+SetCredential=dashscope_api_key:
+LoadCredential=deepseek_api_key:/etc/newsdaily/credentials/deepseek_api_key
+LoadCredential=openai_api_key:/etc/newsdaily/credentials/openai_api_key
+LoadCredential=dashscope_api_key:/etc/newsdaily/credentials/dashscope_api_key
+LoadCredential=smtp_auth_code:/etc/newsdaily/credentials/smtp_auth_code
+LoadCredential=sender_email:/etc/newsdaily/credentials/sender_email
+LoadCredential=recipient_email:/etc/newsdaily/credentials/recipient_email
+ExecStart=/opt/newsdaily/.venv/bin/python -B -m app.cli full-run --preview-only
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=strict
+ReadWritePaths=/opt/newsdaily/data /opt/newsdaily/output
+UMask=0077

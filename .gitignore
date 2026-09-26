@@ -1,0 +1,12 @@
+.venv/
+__pycache__/
+*.py[cod]
+.env
+data/
+output/
+logs/
+.pytest_cache/
+*.eml
+*.sqlite3
+credentials/
+secrets/

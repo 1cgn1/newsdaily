@@ -1,0 +1,1 @@
+"""Cross-media daily prototype."""

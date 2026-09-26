@@ -1,0 +1,23 @@
+[Unit]
+Description=Manually confirmed newsdaily email send for %i
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+TimeoutStartSec=3min
+User=newsdaily
+Group=newsdaily
+WorkingDirectory=/opt/newsdaily
+EnvironmentFile=/etc/newsdaily/config
+Environment=PYTHONUNBUFFERED=1
+LoadCredential=smtp_auth_code:/etc/newsdaily/credentials/smtp_auth_code
+LoadCredential=sender_email:/etc/newsdaily/credentials/sender_email
+LoadCredential=recipient_email:/etc/newsdaily/credentials/recipient_email
+ExecStart=/opt/newsdaily/.venv/bin/python -B -m app.cli send --digest %i --confirm
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=strict
+ReadWritePaths=/opt/newsdaily/data
+UMask=0077

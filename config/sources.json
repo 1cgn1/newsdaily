@@ -1,0 +1,1087 @@
+[
+  {
+    "id": "reuters",
+    "name": "Reuters",
+    "homepage": "https://www.reuters.com/",
+    "region": "全球",
+    "language": "en",
+    "organization_type": "通讯社",
+    "enabled": false,
+    "discovery_strategy": "rss_or_section",
+    "section_urls": [
+      "https://www.reuters.com/world/"
+    ],
+    "notes": "全球通讯社基线",
+    "original_pool": true,
+    "pool_status": "inactive",
+    "inactive_reason": "2026-09-25 实测 robots 明确禁止当前采集入口；恢复前需合规入口和文章级复验"
+  },
+  {
+    "id": "ap",
+    "name": "AP",
+    "homepage": "https://apnews.com/",
+    "region": "美国",
+    "language": "en",
+    "organization_type": "通讯社",
+    "enabled": false,
+    "discovery_strategy": "section",
+    "section_urls": [
+      "https://apnews.com/world-news"
+    ],
+    "notes": "第二条通讯社基线",
+    "original_pool": true,
+    "pool_status": "inactive",
+    "inactive_reason": "2026-09-25 实测栏目入口 HTTP 403；官方 API 为授权服务"
+  },
+  {
+    "id": "bbc",
+    "name": "BBC News",
+    "homepage": "https://www.bbc.com/news",
+    "region": "英国",
+    "language": "en",
+    "organization_type": "公共媒体",
+    "enabled": true,
+    "discovery_strategy": "rss_or_section",
+    "section_urls": [
+      "https://www.bbc.com/news/world"
+    ],
+    "notes": "公共媒体",
+    "original_pool": true,
+    "pool_status": "active"
+  },
+  {
+    "id": "guardian",
+    "name": "The Guardian",
+    "homepage": "https://www.theguardian.com/international",
+    "region": "英国",
+    "language": "en",
+    "organization_type": "商业媒体",
+    "enabled": true,
+    "discovery_strategy": "rss_or_section",
+    "section_urls": [
+      "https://www.theguardian.com/world"
+    ],
+    "notes": "社会议题与政策",
+    "original_pool": true,
+    "pool_status": "active"
+  },
+  {
+    "id": "npr",
+    "name": "NPR",
+    "homepage": "https://www.npr.org/",
+    "region": "美国",
+    "language": "en",
+    "organization_type": "非营利媒体",
+    "enabled": true,
+    "discovery_strategy": "rss",
+    "section_urls": [],
+    "notes": "非营利新闻机构",
+    "original_pool": true,
+    "pool_status": "active"
+  },
+  {
+    "id": "fox",
+    "name": "Fox News",
+    "homepage": "https://www.foxnews.com/",
+    "region": "美国",
+    "language": "en",
+    "organization_type": "商业媒体",
+    "enabled": true,
+    "discovery_strategy": "section",
+    "section_urls": [
+      "https://www.foxnews.com/world"
+    ],
+    "notes": "区分新闻与评论",
+    "original_pool": true,
+    "pool_status": "active"
+  },
+  {
+    "id": "dw",
+    "name": "DW",
+    "homepage": "https://www.dw.com/",
+    "region": "德国",
+    "language": "en",
+    "organization_type": "公共媒体",
+    "enabled": true,
+    "discovery_strategy": "section",
+    "section_urls": [
+      "https://www.dw.com/en/top-stories/s-9097"
+    ],
+    "notes": "德国公共国际媒体",
+    "original_pool": true,
+    "pool_status": "active"
+  },
+  {
+    "id": "xinhuanet",
+    "name": "新华社",
+    "homepage": "https://www.news.cn/",
+    "region": "中国大陆",
+    "language": "zh",
+    "organization_type": "国家通讯社",
+    "enabled": true,
+    "discovery_strategy": "section",
+    "section_urls": [
+      "https://www.news.cn/world/"
+    ],
+    "notes": "官方报道",
+    "original_pool": true,
+    "pool_status": "active"
+  },
+  {
+    "id": "globaltimes",
+    "name": "环球时报",
+    "homepage": "https://www.globaltimes.cn/",
+    "region": "中国大陆",
+    "language": "en",
+    "organization_type": "商业媒体",
+    "enabled": true,
+    "discovery_strategy": "section",
+    "section_urls": [
+      "https://www.globaltimes.cn/world"
+    ],
+    "notes": "区分新闻、社论及评论",
+    "original_pool": true,
+    "pool_status": "active"
+  },
+  {
+    "id": "caixin",
+    "name": "财新",
+    "homepage": "https://www.caixin.com/",
+    "region": "中国大陆",
+    "language": "zh",
+    "organization_type": "商业媒体",
+    "enabled": true,
+    "discovery_strategy": "section",
+    "section_urls": [
+      "https://international.caixin.com/"
+    ],
+    "notes": "注意付费内容",
+    "original_pool": true,
+    "pool_status": "active"
+  },
+  {
+    "id": "scmp",
+    "name": "SCMP",
+    "homepage": "https://www.scmp.com/",
+    "region": "香港",
+    "language": "en",
+    "organization_type": "商业媒体",
+    "enabled": true,
+    "discovery_strategy": "section",
+    "section_urls": [
+      "https://www.scmp.com/news/world"
+    ],
+    "notes": "记录所有权背景",
+    "original_pool": true,
+    "pool_status": "active"
+  },
+  {
+    "id": "nhk",
+    "name": "NHK WORLD-JAPAN",
+    "homepage": "https://www3.nhk.or.jp/nhkworld/en/news/",
+    "region": "日本",
+    "language": "en",
+    "organization_type": "公共媒体",
+    "enabled": false,
+    "discovery_strategy": "section",
+    "section_urls": [
+      "https://www3.nhk.or.jp/nhkworld/news/"
+    ],
+    "notes": "日本及东亚视角",
+    "original_pool": true,
+    "pool_status": "inactive",
+    "inactive_reason": "2026-09-25 实测入口为脚本页面，未发现可核验普通文章链接；旧 RSS 404，节目 feed 不合格"
+  },
+  {
+    "id": "cna",
+    "name": "CNA",
+    "homepage": "https://www.channelnewsasia.com/",
+    "region": "新加坡",
+    "language": "en",
+    "organization_type": "公共媒体",
+    "enabled": true,
+    "discovery_strategy": "section",
+    "section_urls": [
+      "https://www.channelnewsasia.com/world"
+    ],
+    "notes": "东南亚新闻",
+    "original_pool": true,
+    "pool_status": "active"
+  },
+  {
+    "id": "indianexpress",
+    "name": "The Indian Express",
+    "homepage": "https://indianexpress.com/",
+    "region": "印度",
+    "language": "en",
+    "organization_type": "商业媒体",
+    "enabled": false,
+    "discovery_strategy": "section",
+    "section_urls": [
+      "https://indianexpress.com/section/world/"
+    ],
+    "notes": "印度本地报业",
+    "original_pool": true,
+    "pool_status": "inactive",
+    "inactive_reason": "2026-09-25 robots.txt 返回 403，访问规则无法确认；官方 RSS 许可限个人非商业使用，待人工确认"
+  },
+  {
+    "id": "tempo",
+    "name": "Tempo",
+    "homepage": "https://www.tempo.co/",
+    "region": "印尼",
+    "language": "id",
+    "organization_type": "独立媒体",
+    "enabled": true,
+    "discovery_strategy": "section",
+    "section_urls": [
+      "https://www.tempo.co/internasional"
+    ],
+    "notes": "印尼语报道",
+    "original_pool": true,
+    "pool_status": "active"
+  },
+  {
+    "id": "abc",
+    "name": "ABC News",
+    "homepage": "https://www.abc.net.au/news",
+    "region": "澳大利亚",
+    "language": "en",
+    "organization_type": "公共媒体",
+    "enabled": true,
+    "discovery_strategy": "section",
+    "section_urls": [
+      "https://www.abc.net.au/news/world"
+    ],
+    "notes": "澳洲和太平洋",
+    "original_pool": true,
+    "pool_status": "active"
+  },
+  {
+    "id": "aljazeera",
+    "name": "Al Jazeera",
+    "homepage": "https://www.aljazeera.com/",
+    "region": "卡塔尔",
+    "language": "en",
+    "organization_type": "公共媒体",
+    "enabled": true,
+    "discovery_strategy": "section",
+    "section_urls": [
+      "https://www.aljazeera.com/news/"
+    ],
+    "notes": "记录资金背景",
+    "original_pool": true,
+    "pool_status": "active"
+  },
+  {
+    "id": "timesofisrael",
+    "name": "The Times of Israel",
+    "homepage": "https://www.timesofisrael.com/",
+    "region": "以色列",
+    "language": "en",
+    "organization_type": "商业媒体",
+    "enabled": false,
+    "discovery_strategy": "section",
+    "section_urls": [
+      "https://www.timesofisrael.com/"
+    ],
+    "notes": "当地英文报道",
+    "original_pool": true,
+    "pool_status": "inactive",
+    "inactive_reason": "2026-09-25 robots 允许但入口 HTTP 403；不得规避站点限制"
+  },
+  {
+    "id": "972mag",
+    "name": "+972 Magazine",
+    "homepage": "https://www.972mag.com/",
+    "region": "巴以",
+    "language": "en",
+    "organization_type": "独立媒体",
+    "enabled": false,
+    "discovery_strategy": "section",
+    "section_urls": [
+      "https://www.972mag.com/"
+    ],
+    "notes": "调查及分析",
+    "original_pool": true,
+    "pool_status": "inactive",
+    "inactive_reason": "2026-09-25 入口 HTTP 403；不得规避站点限制"
+  },
+  {
+    "id": "presstv",
+    "name": "Press TV",
+    "homepage": "https://www.presstv.ir/",
+    "region": "伊朗",
+    "language": "en",
+    "organization_type": "国家媒体",
+    "enabled": false,
+    "discovery_strategy": "section",
+    "section_urls": [
+      "https://www.presstv.ir/"
+    ],
+    "notes": "重视独立核对",
+    "original_pool": true,
+    "pool_status": "inactive",
+    "inactive_reason": "2026-09-25 Python 报证书验证失败，Windows Schannel 独立复核返回 CRYPT_E_REVOKED（证书已撤销）；不关闭 TLS 验证"
+  },
+  {
+    "id": "tass",
+    "name": "TASS",
+    "homepage": "https://tass.com/",
+    "region": "俄罗斯",
+    "language": "en",
+    "organization_type": "国家通讯社",
+    "enabled": true,
+    "discovery_strategy": "section",
+    "section_urls": [
+      "https://tass.com/world"
+    ],
+    "notes": "国有通讯社",
+    "original_pool": true,
+    "pool_status": "active"
+  },
+  {
+    "id": "meduza",
+    "name": "Meduza",
+    "homepage": "https://meduza.io/en",
+    "region": "俄罗斯/境外",
+    "language": "en",
+    "organization_type": "独立媒体",
+    "enabled": true,
+    "discovery_strategy": "section",
+    "section_urls": [
+      "https://meduza.io/en"
+    ],
+    "notes": "境外运营",
+    "original_pool": true,
+    "pool_status": "active"
+  },
+  {
+    "id": "kyivindependent",
+    "name": "Kyiv Independent",
+    "homepage": "https://kyivindependent.com/",
+    "region": "乌克兰",
+    "language": "en",
+    "organization_type": "独立媒体",
+    "enabled": true,
+    "discovery_strategy": "rss",
+    "section_urls": [
+      "https://kyivindependent.com/"
+    ],
+    "notes": "乌克兰本地报道",
+    "feed_urls": [
+      "https://kyivindependent.com/news-archive/rss/"
+    ],
+    "original_pool": true,
+    "pool_status": "active"
+  },
+  {
+    "id": "africanews",
+    "name": "Africanews",
+    "homepage": "https://www.africanews.com/",
+    "region": "泛非洲",
+    "language": "en",
+    "organization_type": "地区媒体",
+    "enabled": true,
+    "discovery_strategy": "section",
+    "section_urls": [
+      "https://www.africanews.com/"
+    ],
+    "notes": "非洲地区新闻",
+    "original_pool": true,
+    "pool_status": "active"
+  },
+  {
+    "id": "dailymaverick",
+    "name": "Daily Maverick",
+    "homepage": "https://www.dailymaverick.co.za/",
+    "region": "南非",
+    "language": "en",
+    "organization_type": "独立媒体",
+    "enabled": true,
+    "discovery_strategy": "section",
+    "section_urls": [
+      "https://www.dailymaverick.co.za/"
+    ],
+    "notes": "调查及政治新闻",
+    "original_pool": true,
+    "pool_status": "active"
+  },
+  {
+    "id": "elpais",
+    "name": "EL PAÍS América",
+    "homepage": "https://elpais.com/america/",
+    "region": "拉美",
+    "language": "es",
+    "organization_type": "商业媒体",
+    "enabled": false,
+    "discovery_strategy": "section",
+    "section_urls": [
+      "https://elpais.com/america/"
+    ],
+    "notes": "西语拉美版",
+    "original_pool": true,
+    "pool_status": "inactive",
+    "inactive_reason": "2026-09-25 robots 允许但栏目入口 HTTP 403；不得规避站点限制"
+  },
+  {
+    "id": "agenciabrasil",
+    "name": "Agência Brasil",
+    "homepage": "https://agenciabrasil.ebc.com.br/",
+    "region": "巴西",
+    "language": "pt",
+    "organization_type": "公共通讯机构",
+    "enabled": true,
+    "discovery_strategy": "section",
+    "section_urls": [
+      "https://agenciabrasil.ebc.com.br/en/internacional"
+    ],
+    "notes": "葡语新闻",
+    "original_pool": true,
+    "pool_status": "active"
+  },
+  {
+    "id": "antara",
+    "name": "ANTARA News English",
+    "homepage": "https://en.antaranews.com/",
+    "region": "印尼",
+    "language": "en",
+    "organization_type": "国家通讯社",
+    "funding_background": "印度尼西亚国有通讯社",
+    "perspective": "印尼及东南亚本地英文通讯社报道",
+    "discovery_strategy": "section",
+    "section_urls": [
+      "https://en.antaranews.com/world"
+    ],
+    "notes": "优先候选；必须排除 Press Release/PR Wire",
+    "enabled": true,
+    "pool_status": "active",
+    "validation": {
+      "checked_at": "2026-09-25T02:30:09.102108+00:00",
+      "report": "output/candidate-validation-second-2026-09-25-rerun.json",
+      "article_pages_requested": 1,
+      "qualified_articles": 1,
+      "time_parseable": 1,
+      "within_36h": 1,
+      "examples": [
+        "https://en.antaranews.com/news/432595/ministry-bolsters-indonesias-readiness-to-become-global-halal-hub"
+      ]
+    },
+    "last_validation": {
+      "checked_at": "2026-09-25T02:30:09.102108+00:00",
+      "status": "success",
+      "article_pages_requested": 1,
+      "qualified_articles": 1,
+      "time_parseable": 1,
+      "within_36h": 1,
+      "diagnostics": [
+        {
+          "phase": "discovery_robots",
+          "url": "https://en.antaranews.com/world",
+          "allowed": true,
+          "reason": "allowed",
+          "robots_url": "https://en.antaranews.com/robots.txt",
+          "robots_http_status": 200,
+          "robots_error": ""
+        }
+      ],
+      "article_errors": [],
+      "examples": [
+        "https://en.antaranews.com/news/432595/ministry-bolsters-indonesias-readiness-to-become-global-halal-hub"
+      ]
+    },
+    "original_pool": false,
+    "candidate_filter": "reject PR Wire/PRNewswire press releases"
+  },
+  {
+    "id": "ukrinform",
+    "name": "Ukrinform",
+    "homepage": "https://www.ukrinform.net/",
+    "region": "乌克兰",
+    "language": "en",
+    "organization_type": "国家通讯社",
+    "funding_background": "乌克兰国家通讯社",
+    "perspective": "乌克兰政府与本地事件英文报道",
+    "discovery_strategy": "section",
+    "section_urls": [
+      "https://www.ukrinform.net/"
+    ],
+    "notes": "优先候选",
+    "enabled": false,
+    "pool_status": "candidate",
+    "candidate_reason": "robots 请求本机 DNS 解析失败（Errno 2）；属于出口/DNS 未决，不判永久不可用",
+    "last_validation": {
+      "checked_at": "2026-09-25T02:26:22.327131+00:00",
+      "status": "robots_blocked_or_unavailable",
+      "article_pages_requested": 0,
+      "qualified_articles": 0,
+      "time_parseable": 0,
+      "within_36h": 0,
+      "diagnostics": [
+        {
+          "phase": "discovery_robots",
+          "url": "https://www.ukrinform.net/",
+          "allowed": false,
+          "reason": "robots_unavailable",
+          "robots_url": "https://www.ukrinform.net/robots.txt",
+          "robots_http_status": null,
+          "robots_error": "URLError: <urlopen error [Errno 2] No such file or directory>"
+        }
+      ],
+      "article_errors": [],
+      "examples": []
+    },
+    "original_pool": false
+  },
+  {
+    "id": "pbs",
+    "name": "PBS News",
+    "homepage": "https://www.pbs.org/newshour/",
+    "region": "美国",
+    "language": "en",
+    "organization_type": "公共媒体/非营利制作机构",
+    "funding_background": "News Hour Productions LLC（WETA 全资非营利子公司），含公共与披露赞助资金",
+    "perspective": "美国公共媒体国际报道与访谈",
+    "discovery_strategy": "rss",
+    "section_urls": [
+      "https://www.pbs.org/newshour/world"
+    ],
+    "feed_urls": [
+      "https://www.pbs.org/newshour/feeds/rss/headlines"
+    ],
+    "notes": "优先候选；须识别 AP 转载",
+    "enabled": false,
+    "pool_status": "candidate",
+    "candidate_reason": "robots 请求 TLS 握手超时；当前网络未完成文章级验证，不判永久不可用",
+    "last_validation": {
+      "checked_at": "2026-09-25T02:26:36.809391+00:00",
+      "status": "robots_blocked_or_unavailable",
+      "article_pages_requested": 0,
+      "qualified_articles": 0,
+      "time_parseable": 0,
+      "within_36h": 0,
+      "diagnostics": [
+        {
+          "phase": "discovery_robots",
+          "url": "https://www.pbs.org/newshour/feeds/rss/headlines",
+          "allowed": false,
+          "reason": "robots_unavailable",
+          "robots_url": "https://www.pbs.org/robots.txt",
+          "robots_http_status": null,
+          "robots_error": "URLError: <urlopen error _ssl.c:990: The handshake operation timed out>"
+        }
+      ],
+      "article_errors": [],
+      "examples": []
+    },
+    "original_pool": false,
+    "candidate_filter": "track Associated Press original-provider attribution; no independent PBS credit for wire copies"
+  },
+  {
+    "id": "mainichi",
+    "name": "The Mainichi",
+    "homepage": "https://mainichi.jp/english/",
+    "region": "日本",
+    "language": "en",
+    "organization_type": "商业媒体",
+    "funding_background": "每日新闻社英文数字版",
+    "perspective": "日本本地英文政治、经济与社会报道",
+    "discovery_strategy": "section",
+    "section_urls": [
+      "https://mainichi.jp/english/"
+    ],
+    "notes": "优先候选",
+    "enabled": true,
+    "pool_status": "active",
+    "validation": {
+      "checked_at": "2026-09-25T02:26:42.161817+00:00",
+      "report": "output/candidate-validation-priority-2026-09-25-rerun.json",
+      "article_pages_requested": 2,
+      "qualified_articles": 2,
+      "time_parseable": 2,
+      "within_36h": 2,
+      "examples": [
+        "https://mainichi.jp/english/articles/20260925/p2g/00m/0sp/004000c",
+        "https://mainichi.jp/english/articles/20260925/p2g/00m/0na/006000c"
+      ]
+    },
+    "last_validation": {
+      "checked_at": "2026-09-25T02:26:42.161817+00:00",
+      "status": "success",
+      "article_pages_requested": 2,
+      "qualified_articles": 2,
+      "time_parseable": 2,
+      "within_36h": 2,
+      "diagnostics": [
+        {
+          "phase": "discovery_robots",
+          "url": "https://mainichi.jp/english/",
+          "allowed": true,
+          "reason": "allowed",
+          "robots_url": "https://mainichi.jp/robots.txt",
+          "robots_http_status": 200,
+          "robots_error": ""
+        }
+      ],
+      "article_errors": [],
+      "examples": [
+        "https://mainichi.jp/english/articles/20260925/p2g/00m/0sp/004000c",
+        "https://mainichi.jp/english/articles/20260925/p2g/00m/0na/006000c"
+      ]
+    },
+    "original_pool": false
+  },
+  {
+    "id": "scroll",
+    "name": "Scroll.in",
+    "homepage": "https://scroll.in/",
+    "region": "印度",
+    "language": "en",
+    "organization_type": "独立数字媒体",
+    "funding_background": "SCSN Pvt Ltd；含会员支持",
+    "perspective": "印度国内政治、社会与区域议题",
+    "discovery_strategy": "section",
+    "section_urls": [
+      "https://scroll.in/latest/"
+    ],
+    "notes": "优先候选；排除 Rush Hour 等每日汇总",
+    "enabled": true,
+    "pool_status": "active",
+    "validation": {
+      "checked_at": "2026-09-25T02:26:46.582098+00:00",
+      "report": "output/candidate-validation-priority-2026-09-25-rerun.json",
+      "article_pages_requested": 2,
+      "qualified_articles": 2,
+      "time_parseable": 2,
+      "within_36h": 2,
+      "examples": [
+        "https://scroll.in/latest/1095977/journalist-ravi-nair-gets-bail-in-adani-defamation-case",
+        "https://scroll.in/latest/1095976/cec-gyanesh-kumar-should-resign-turn-approver-says-rahul-gandhi"
+      ]
+    },
+    "last_validation": {
+      "checked_at": "2026-09-25T02:26:46.582098+00:00",
+      "status": "success",
+      "article_pages_requested": 2,
+      "qualified_articles": 2,
+      "time_parseable": 2,
+      "within_36h": 2,
+      "diagnostics": [
+        {
+          "phase": "discovery_robots",
+          "url": "https://scroll.in/latest/",
+          "allowed": true,
+          "reason": "allowed",
+          "robots_url": "https://scroll.in/robots.txt",
+          "robots_http_status": 200,
+          "robots_error": ""
+        }
+      ],
+      "article_errors": [],
+      "examples": [
+        "https://scroll.in/latest/1095977/journalist-ravi-nair-gets-bail-in-adani-defamation-case",
+        "https://scroll.in/latest/1095976/cec-gyanesh-kumar-should-resign-turn-approver-says-rahul-gandhi"
+      ]
+    },
+    "original_pool": false,
+    "candidate_filter": "exclude daily roundups such as Rush Hour"
+  },
+  {
+    "id": "infobae",
+    "name": "Infobae América",
+    "homepage": "https://www.infobae.com/america/",
+    "region": "拉美",
+    "language": "es",
+    "organization_type": "商业数字媒体",
+    "funding_background": "阿根廷私营数字媒体",
+    "perspective": "西语拉美多国新闻",
+    "discovery_strategy": "section",
+    "section_urls": [
+      "https://www.infobae.com/america/america-latina/"
+    ],
+    "notes": "优先候选；核对转载署名",
+    "candidate_reason": "本轮2篇中仅1篇可解析真实发布时间；继续有限采样，不用 URL 日期替代发布时间",
+    "enabled": false,
+    "pool_status": "candidate",
+    "last_validation": {
+      "checked_at": "2026-09-25T02:28:16.492836+00:00",
+      "status": "success",
+      "article_pages_requested": 2,
+      "qualified_articles": 2,
+      "time_parseable": 1,
+      "within_36h": 1,
+      "diagnostics": [
+        {
+          "phase": "discovery_robots",
+          "url": "https://www.infobae.com/america/america-latina/",
+          "allowed": true,
+          "reason": "allowed",
+          "robots_url": "https://www.infobae.com/robots.txt",
+          "robots_http_status": 200,
+          "robots_error": ""
+        }
+      ],
+      "article_errors": [],
+      "examples": [
+        "https://www.infobae.com/republica-dominicana/2026/09/25/la-gobernadora-kathy-hochul-y-el-presidente-luis-abinader-refuerzan-la-cooperacion-climatica-entre-nueva-york-y-republica-dominicana/",
+        "https://www.infobae.com/republica-dominicana/2026/09/24/la-republica-dominicana-debutara-ante-nicaragua-en-la-liga-de-naciones-este-jueves-en-santiago-de-los-caballeros/"
+      ]
+    },
+    "original_pool": false
+  },
+  {
+    "id": "mondoweiss",
+    "name": "Mondoweiss",
+    "homepage": "https://mondoweiss.net/",
+    "region": "巴以/美国",
+    "language": "en",
+    "organization_type": "非营利独立媒体",
+    "funding_background": "美国非营利读者支持媒体",
+    "perspective": "巴勒斯坦、以色列及美国政策的批判性报道",
+    "discovery_strategy": "section",
+    "section_urls": [
+      "https://mondoweiss.net/"
+    ],
+    "notes": "优先候选",
+    "enabled": true,
+    "pool_status": "active",
+    "validation": {
+      "checked_at": "2026-09-25T02:28:21.523568+00:00",
+      "report": "output/candidate-validation-priority-2026-09-25-rerun.json",
+      "article_pages_requested": 2,
+      "qualified_articles": 2,
+      "time_parseable": 2,
+      "within_36h": 2,
+      "examples": [
+        "https://mondoweiss.net/2026/09/what-you-need-to-know-about-robert-kraft-the-pro-israel-billionaire-who-pressured-ed-sheeran-to-drop-macklemore/",
+        "https://mondoweiss.net/2026/09/palestinian-elections-gaza-west-bank-youth-launch-independent-list-in-rejection-of-factional-politics/"
+      ]
+    },
+    "last_validation": {
+      "checked_at": "2026-09-25T02:28:21.523568+00:00",
+      "status": "success",
+      "article_pages_requested": 2,
+      "qualified_articles": 2,
+      "time_parseable": 2,
+      "within_36h": 2,
+      "diagnostics": [
+        {
+          "phase": "discovery_robots",
+          "url": "https://mondoweiss.net/",
+          "allowed": true,
+          "reason": "allowed",
+          "robots_url": "https://mondoweiss.net/robots.txt",
+          "robots_http_status": 200,
+          "robots_error": ""
+        }
+      ],
+      "article_errors": [],
+      "examples": [
+        "https://mondoweiss.net/2026/09/what-you-need-to-know-about-robert-kraft-the-pro-israel-billionaire-who-pressured-ed-sheeran-to-drop-macklemore/",
+        "https://mondoweiss.net/2026/09/palestinian-elections-gaza-west-bank-youth-launch-independent-list-in-rejection-of-factional-politics/"
+      ]
+    },
+    "original_pool": false
+  },
+  {
+    "id": "jpost",
+    "name": "The Jerusalem Post",
+    "homepage": "https://www.jpost.com/",
+    "region": "以色列",
+    "language": "en",
+    "organization_type": "商业媒体",
+    "funding_background": "以色列私营英文报业",
+    "perspective": "以色列本地英文报道",
+    "discovery_strategy": "rss_restricted",
+    "section_urls": [
+      "https://www.jpost.com/"
+    ],
+    "feed_urls": [
+      "https://www.jpost.com/rss/rssfeedsfrontpage.aspx"
+    ],
+    "feed_content_only": true,
+    "notes": "只使用官方 RSS 明示内容；不得抓取 feed 未提供内容",
+    "enabled": true,
+    "pool_status": "active",
+    "validation": {
+      "checked_at": "2026-09-25T02:29:52.848016+00:00",
+      "report": "output/candidate-validation-priority-2026-09-25-rerun.json",
+      "article_pages_requested": 0,
+      "qualified_articles": 2,
+      "time_parseable": 2,
+      "within_36h": 1,
+      "examples": [
+        "https://www.jpost.com/middle-east/iran-news/article-909644",
+        "https://www.jpost.com/israel-news/article-909647"
+      ],
+      "access_note": "仅官方 RSS 摘要；文章页请求数为 0"
+    },
+    "last_validation": {
+      "checked_at": "2026-09-25T02:29:52.848016+00:00",
+      "status": "success",
+      "article_pages_requested": 0,
+      "qualified_articles": 2,
+      "time_parseable": 2,
+      "within_36h": 1,
+      "diagnostics": [
+        {
+          "phase": "discovery_robots",
+          "url": "https://www.jpost.com/rss/rssfeedsfrontpage.aspx",
+          "allowed": true,
+          "reason": "allowed",
+          "robots_url": "https://www.jpost.com/robots.txt",
+          "robots_http_status": 200,
+          "robots_error": ""
+        }
+      ],
+      "article_errors": [],
+      "examples": [
+        "https://www.jpost.com/middle-east/iran-news/article-909644",
+        "https://www.jpost.com/israel-news/article-909647"
+      ]
+    },
+    "original_pool": false
+  },
+  {
+    "id": "france24",
+    "name": "France 24 English",
+    "homepage": "https://www.france24.com/en/",
+    "region": "法国/全球",
+    "language": "en",
+    "organization_type": "公共国际媒体",
+    "funding_background": "France Médias Monde 法国公共国际广播集团",
+    "perspective": "法国及法语世界的国际新闻视角",
+    "discovery_strategy": "section",
+    "section_urls": [
+      "https://www.france24.com/en/"
+    ],
+    "notes": "第二批候选",
+    "enabled": false,
+    "pool_status": "candidate",
+    "candidate_reason": "robots 允许，但栏目页请求 HTTP 403；不绕过站点限制",
+    "last_validation": {
+      "checked_at": "2026-09-25T02:31:22.270743+00:00",
+      "status": "failed",
+      "article_pages_requested": 0,
+      "qualified_articles": 0,
+      "time_parseable": 0,
+      "within_36h": 0,
+      "diagnostics": [
+        {
+          "phase": "discovery_robots",
+          "url": "https://www.france24.com/en/",
+          "allowed": true,
+          "reason": "allowed",
+          "robots_url": "https://www.france24.com/robots.txt",
+          "robots_http_status": 200,
+          "robots_error": ""
+        }
+      ],
+      "article_errors": [
+        {
+          "url": "https://www.france24.com/en/",
+          "class": "http_403",
+          "error": "HTTPError: HTTP Error 403: Forbidden"
+        }
+      ],
+      "examples": []
+    },
+    "original_pool": false
+  },
+  {
+    "id": "trtworld",
+    "name": "TRT World",
+    "homepage": "https://www.trtworld.com/",
+    "region": "土耳其/全球",
+    "language": "en",
+    "organization_type": "国家公共媒体",
+    "funding_background": "土耳其广播电视公司 TRT",
+    "perspective": "土耳其及周边地区英文国际报道",
+    "discovery_strategy": "section",
+    "section_urls": [
+      "https://www.trtworld.com/"
+    ],
+    "notes": "第二批候选",
+    "enabled": true,
+    "pool_status": "active",
+    "validation": {
+      "checked_at": "2026-09-25T02:31:23.905171+00:00",
+      "report": "output/candidate-validation-second-2026-09-25-rerun.json",
+      "article_pages_requested": 1,
+      "qualified_articles": 1,
+      "time_parseable": 1,
+      "within_36h": 1,
+      "examples": [
+        "https://www.trtworld.com/article/fa2bfc47262b"
+      ]
+    },
+    "last_validation": {
+      "checked_at": "2026-09-25T02:31:23.905171+00:00",
+      "status": "success",
+      "article_pages_requested": 1,
+      "qualified_articles": 1,
+      "time_parseable": 1,
+      "within_36h": 1,
+      "diagnostics": [
+        {
+          "phase": "discovery_robots",
+          "url": "https://www.trtworld.com/",
+          "allowed": true,
+          "reason": "allowed",
+          "robots_url": "https://www.trtworld.com/robots.txt",
+          "robots_http_status": 200,
+          "robots_error": ""
+        }
+      ],
+      "article_errors": [],
+      "examples": [
+        "https://www.trtworld.com/article/fa2bfc47262b"
+      ]
+    },
+    "original_pool": false
+  },
+  {
+    "id": "iranintl",
+    "name": "Iran International",
+    "homepage": "https://www.iranintl.com/en",
+    "region": "伊朗/境外",
+    "language": "en",
+    "organization_type": "境外商业媒体",
+    "funding_background": "所有权及资金来源无法从已核对的官方公开披露中确证",
+    "perspective": "伊朗境外及侨民视角；背景标签不作可信度评分",
+    "discovery_strategy": "section",
+    "section_urls": [
+      "https://www.iranintl.com/en"
+    ],
+    "notes": "第二批候选",
+    "enabled": true,
+    "pool_status": "active",
+    "validation": {
+      "checked_at": "2026-09-25T02:31:39.114960+00:00",
+      "report": "output/candidate-validation-second-2026-09-25-rerun.json",
+      "article_pages_requested": 1,
+      "qualified_articles": 1,
+      "time_parseable": 1,
+      "within_36h": 1,
+      "examples": [
+        "https://www.iranintl.com/en/202609242426"
+      ]
+    },
+    "last_validation": {
+      "checked_at": "2026-09-25T02:31:39.114960+00:00",
+      "status": "success",
+      "article_pages_requested": 1,
+      "qualified_articles": 1,
+      "time_parseable": 1,
+      "within_36h": 1,
+      "diagnostics": [
+        {
+          "phase": "discovery_robots",
+          "url": "https://www.iranintl.com/en",
+          "allowed": true,
+          "reason": "allowed",
+          "robots_url": "https://www.iranintl.com/robots.txt",
+          "robots_http_status": 200,
+          "robots_error": ""
+        }
+      ],
+      "article_errors": [],
+      "examples": [
+        "https://www.iranintl.com/en/202609242426"
+      ]
+    },
+    "original_pool": false
+  },
+  {
+    "id": "rfa",
+    "name": "Radio Free Asia",
+    "homepage": "https://www.rfa.org/english/",
+    "region": "亚洲",
+    "language": "en",
+    "organization_type": "美国政府资助非营利媒体",
+    "funding_background": "美国国会拨款、USAGM 监督下的私营非营利机构",
+    "perspective": "亚洲受限媒体环境和人权议题",
+    "discovery_strategy": "section",
+    "section_urls": [
+      "https://www.rfa.org/english/"
+    ],
+    "notes": "第二批候选",
+    "enabled": true,
+    "pool_status": "active",
+    "validation": {
+      "checked_at": "2026-09-25T02:32:52.001630+00:00",
+      "report": "output/candidate-validation-second-2026-09-25-rerun.json",
+      "article_pages_requested": 1,
+      "qualified_articles": 1,
+      "time_parseable": 1,
+      "within_36h": 1,
+      "examples": [
+        "https://www.rfa.org/english/tibet/2026/09/24/tibet-protest-xi-jinping-china-washington-trump-photos/"
+      ]
+    },
+    "last_validation": {
+      "checked_at": "2026-09-25T02:32:52.001630+00:00",
+      "status": "success",
+      "article_pages_requested": 1,
+      "qualified_articles": 1,
+      "time_parseable": 1,
+      "within_36h": 1,
+      "diagnostics": [
+        {
+          "phase": "discovery_robots",
+          "url": "https://www.rfa.org/english/",
+          "allowed": true,
+          "reason": "allowed",
+          "robots_url": "https://www.rfa.org/robots.txt",
+          "robots_http_status": 200,
+          "robots_error": ""
+        }
+      ],
+      "article_errors": [],
+      "examples": [
+        "https://www.rfa.org/english/tibet/2026/09/24/tibet-protest-xi-jinping-china-washington-trump-photos/"
+      ]
+    },
+    "original_pool": false
+  },
+  {
+    "id": "nationafrica",
+    "name": "Nation.Africa",
+    "homepage": "https://nation.africa/",
+    "region": "东非",
+    "language": "en",
+    "organization_type": "商业媒体",
+    "funding_background": "Nation Media Group",
+    "perspective": "肯尼亚、东非与非洲本地报道",
+    "discovery_strategy": "section",
+    "section_urls": [
+      "https://nation.africa/kenya/news"
+    ],
+    "notes": "第二批候选",
+    "enabled": false,
+    "pool_status": "candidate",
+    "candidate_reason": "robots.txt 返回 HTTP 403，访问规则无法确认；不继续抓取",
+    "last_validation": {
+      "checked_at": "2026-09-25T02:32:54.931906+00:00",
+      "status": "robots_blocked_or_unavailable",
+      "article_pages_requested": 0,
+      "qualified_articles": 0,
+      "time_parseable": 0,
+      "within_36h": 0,
+      "diagnostics": [
+        {
+          "phase": "discovery_robots",
+          "url": "https://nation.africa/kenya/news",
+          "allowed": false,
+          "reason": "robots_unavailable",
+          "robots_url": "https://nation.africa/robots.txt",
+          "robots_http_status": 403,
+          "robots_error": "HTTP 403"
+        }
+      ],
+      "article_errors": [],
+      "examples": []
+    },
+    "original_pool": false
+  }
+]

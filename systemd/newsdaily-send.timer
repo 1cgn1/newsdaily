@@ -1,0 +1,11 @@
+[Unit]
+Description=Run newsdaily automatic send every day at 08:00 Beijing time
+
+[Timer]
+OnCalendar=*-*-* 08:00:00 Asia/Shanghai
+AccuracySec=1s
+Persistent=true
+Unit=newsdaily-send.service
+
+[Install]
+WantedBy=timers.target
