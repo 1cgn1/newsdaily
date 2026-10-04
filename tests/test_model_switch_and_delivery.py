@@ -49,11 +49,11 @@ class ModelSwitchTests(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             _response_with_complete_prefix({"choices":[{"finish_reason":"length","message":{"content":'{"events":[{"event_id":'}}]})
 
-    def test_runaway_event_list_is_bounded_before_validation(self):
+    def test_runaway_event_list_is_inspected_without_hidden_scan_cap(self):
         raw=json.dumps({"events":[{"event_id":str(index)} for index in range(200)]})
         valid,rejected=_salvage_valid_drafts({"choices":[{"message":{"content":raw}}]},[],30)
         self.assertEqual(len(valid),0)
-        self.assertEqual(len(rejected),90)
+        self.assertEqual(len(rejected),200)
 
     def test_cli_auto_send_only_after_complete_generation(self):
         from app import cli

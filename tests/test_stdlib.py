@@ -10,7 +10,7 @@ from app.sample import sample_articles, sample_events
 from app.validation import validate_event
 from app.collector import PageParser, discover_links, normalize_url, deduplicate_articles, within_window, extract_article
 from app.render import _safe_url, render_digest
-from app.pipeline import _parse_events, _check_token_limit, _model_profile, _select_diverse_articles, estimate_tokens, _rough_cluster_articles, _cross_source_candidates, _model_payload, _salvage_valid_drafts, _recover_events, _prioritize_valid_drafts
+from app.pipeline import _parse_events, _check_token_limit, _model_profile, _select_diverse_articles, estimate_tokens, _rough_cluster_articles, _cross_source_candidates, _model_payload, _salvage_valid_drafts, _recover_events
 from app.delivery import FileMailer
 from app.storage import Database
 from app.clock import BEIJING_TZ
@@ -150,11 +150,12 @@ class PrototypeTests(unittest.TestCase):
     def test_model_prompt_requires_fifteen_to_thirty_without_less_is_more_rule(self):
         payload=_model_payload([])
         requirements=" ".join(payload["requirements"])
-        self.assertIn("15至30",requirements)
-        self.assertIn("优先纳入所有",requirements)
+        self.assertIn("目标选择15至30",requirements)
+        self.assertIn("优先纳入有不同媒体",requirements)
+        self.assertIn("可以少于目标下限",requirements)
         self.assertNotIn("材料不足时宁可少选",requirements)
 
-    def test_event_count_is_hard_bound_for_full_run(self):
+    def test_strict_parser_can_still_enforce_explicit_count_for_callers(self):
         response={"choices":[{"message":{"content":json.dumps({"events":[]})}}]}
         with self.assertRaisesRegex(RuntimeError,"below minimum 15"):
             _parse_events(response,[],event_min=15,event_max=30)
@@ -183,26 +184,46 @@ class PrototypeTests(unittest.TestCase):
             self.assertEqual(audit["repair_calls"],0)
             self.assertEqual(combined["usage"]["total_tokens"],150)
 
-    def test_targeted_repair_restores_an_invalid_event_without_weakening_evidence(self):
+    def test_invalid_event_is_dropped_without_another_model_call(self):
         articles=[{"id":aid,"source_id":source,"source_name":source,"language":"zh","title":title,"original_title":title,"url":f"https://{source}.test/story","body":"官员公布了新的协议，双方将继续谈判。"} for aid,source,title in (("a1","one","第一事件"),("a2","two","第二事件"))]
         def draft(aid,eid,quote):
             return {"event_id":eid,"lead_article_id":aid,"summary":"双方公布协议。","claims":[{"text":"双方公布协议。","supporting_article_ids":[aid],"evidence":[{"article_id":aid,"quote":quote}],"attribution":"媒体","status":"single_source"}],"differences":[],"uncertainty":"细节待确认。"}
         original={"choices":[{"message":{"content":json.dumps({"events":[draft("a1","e1","官员公布了新的协议，双方将继续谈判。"),draft("a2","e2","原文中不存在的引句不能通过校验")]},ensure_ascii=False)},"finish_reason":"stop"}],"usage":{"prompt_tokens":100,"completion_tokens":50}}
-        repaired={"choices":[{"message":{"content":json.dumps({"events":[draft("a2","e2","官员公布了新的协议，双方将继续谈判。")]},ensure_ascii=False)},"finish_reason":"stop"}],"usage":{"prompt_tokens":20,"completion_tokens":10}}
         class FakeClient:
             def complete(self,payload,max_tokens):
-                assert max_tokens>0
-                assert payload["draft_event"]["event_id"]=="e2"
-                return repaired
+                self.fail("repair call must not be made")
         settings={"model_provider":"deepseek","model_profiles":{"deepseek":{"max_output_tokens":16000,"context_tokens":1000000}},"max_input_tokens":240000}
         with tempfile.TemporaryDirectory(dir=".") as directory, patch("app.pipeline._event_limits",return_value=(2,3)), patch("app.pipeline._persist_usage"):
             combined,events,audit=_recover_events(original,articles,[],FakeClient(),settings,directory,1,[original])
-            self.assertEqual(len(events),2)
-            self.assertEqual(audit["repair_calls"],1)
-            self.assertEqual(audit["repaired_event_ids"],["e2"])
-            self.assertTrue(Path(directory,"full-model-repair-1-1.json").exists())
+            self.assertEqual(len(events),1)
+            self.assertEqual(audit["repair_calls"],0)
+            self.assertEqual(len(audit["rejected"]),1)
+            self.assertFalse(Path(directory,"full-model-repair-1-1.json").exists())
 
-    def test_overlong_model_list_is_salvaged_with_cross_source_priority(self):
+    def test_below_target_and_missing_cross_source_candidate_do_not_block_digest(self):
+        article={"id":"a1","source_id":"one","source_name":"媒体","language":"zh","title":"有效事件","original_title":"有效事件","url":"https://one.test/story","body":"官员公布了新的协议，双方将继续谈判。"}
+        event={"event_id":"e1","lead_article_id":"a1","summary":"双方公布协议。","claims":[{"text":"双方公布协议。","supporting_article_ids":["a1"],"evidence":[{"article_id":"a1","quote":"官员公布了新的协议，双方将继续谈判。"}],"attribution":"媒体","status":"single_source"}],"differences":[],"uncertainty":"细节待确认。"}
+        response={"choices":[{"message":{"content":json.dumps({"events":[event]},ensure_ascii=False)},"finish_reason":"stop"}],"usage":{"prompt_tokens":10,"completion_tokens":20}}
+        candidate={"cluster_id":"rough-1","article_ids":["a1","a2"],"source_ids":["one","two"]}
+        with patch("app.pipeline._event_limits",return_value=(15,30)):
+            combined,events,audit=_recover_events(response,[article],[candidate],None,{},"unused",1,[response])
+        self.assertEqual(len(events),1)
+        self.assertEqual(audit["cross_source_title_candidates_not_covered"],["rough-1"])
+        self.assertEqual(audit["repair_calls"],0)
+        self.assertEqual(combined["usage"]["total_tokens"],30)
+
+    def test_truncated_tail_keeps_complete_event_without_repair(self):
+        article={"id":"a1","source_id":"one","source_name":"媒体","language":"zh","title":"有效事件","original_title":"有效事件","url":"https://one.test/story","body":"官员公布了新的协议，双方将继续谈判。"}
+        event={"event_id":"e1","lead_article_id":"a1","summary":"双方公布协议。","claims":[{"text":"双方公布协议。","supporting_article_ids":["a1"],"evidence":[{"article_id":"a1","quote":"官员公布了新的协议，双方将继续谈判。"}],"attribution":"媒体","status":"single_source"}],"differences":[],"uncertainty":"细节待确认。"}
+        raw='{"events":['+json.dumps(event,ensure_ascii=False)+',{"event_id":"partial"'
+        response={"choices":[{"message":{"content":raw},"finish_reason":"length"}]}
+        with patch("app.pipeline._event_limits",return_value=(15,30)):
+            _,events,audit=_recover_events(response,[article],[],None,{},"unused",1,[response])
+        self.assertEqual(len(events),1)
+        self.assertTrue(audit["truncated_prefix_recovered"])
+        self.assertEqual(audit["repair_calls"],0)
+
+    def test_overlong_model_list_keeps_model_order_without_extra_call(self):
         articles=[{"id":aid,"source_id":source,"source_name":source,"source_group":source,"language":"zh","title":title,"original_title":title,"url":f"https://{source}.test/story","body":"官员公布了新的协议，双方将继续谈判。"} for aid,source,title in (("a1","one","第一事件"),("a2","two","第二事件"),("a3","three","第三事件"))]
         def claim(ids,status):
             return {"text":"双方公布协议。","supporting_article_ids":ids,"evidence":[{"article_id":aid,"quote":"官员公布了新的协议，双方将继续谈判。"} for aid in ids],"attribution":"媒体","status":status}
@@ -211,9 +232,11 @@ class PrototypeTests(unittest.TestCase):
         valid,rejected=_salvage_valid_drafts(response,articles,2)
         self.assertEqual((len(valid),len(rejected)),(3,0))
         candidate={"cluster_id":"rough-1","article_ids":["a2","a3"],"source_ids":["two","three"]}
-        chosen,overflow=_prioritize_valid_drafts(valid,articles,[candidate],2)
-        self.assertEqual([draft["event_id"] for draft in chosen],["e3","e1"])
-        self.assertEqual(overflow,1)
+        with patch("app.pipeline._event_limits",return_value=(2,2)):
+            _,events,audit=_recover_events(response,articles,[candidate],None,{},"unused",1,[response])
+        self.assertEqual([event["event_id"] for event in events],["e1","e2"])
+        self.assertEqual(audit["valid_excluded_by_event_cap"],1)
+        self.assertEqual(audit["cross_source_title_candidates_not_covered"],["rough-1"])
 
     def test_cross_source_candidate_needs_independent_evidence(self):
         articles=[{"id":aid,"source_id":source,"source_name":source,"source_group":source,"language":"zh","title":"同一事件","original_title":"同一事件","url":f"https://{source}.test/story","body":"官员公布了新的协议，双方将继续谈判。"} for aid,source in (("a1","one"),("a2","two"))]

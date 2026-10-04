@@ -87,7 +87,7 @@ sudo systemctl status newsdaily-check-credentials.service --no-pager
 | `timezone` | 预留说明字段；目前日报日期由代码固定按北京时间计算，改此字段不会改变时区。 |
 | `daily_send_hour` | 预留说明字段；当前定时发送时间由 `systemd/newsdaily-send.timer` 的 `OnCalendar` 决定，改此字段不会更改 timer。 |
 | `article_window_hours` | 纳入日报的新闻发布时间回溯窗口（小时）。 |
-| `daily_event_target_min` / `daily_event_target_max` | 每日报告目标事件数下限/上限；未达到下限或校验失败应停止，不应降低质量门槛来强行发送。 |
+| `daily_event_target_min` / `daily_event_target_max` | 每日报告目标事件数下限/展示上限。下限是给模型的目标，不再是发送门槛；只要至少一条事件通过逐条校验便可生成，上限之外的有效事件不展示。 |
 | `retention_articles_days` | 预留字段；当前没有自动清理文章的任务，改此值不会删除记录。 |
 | `retention_digest_days` | 预留字段；当前没有自动清理日报的任务，改此值不会删除记录。 |
 | `max_input_tokens` | 可修改的模型输入 token 限制，用于控制提交给模型的输入规模。 |
@@ -95,7 +95,7 @@ sudo systemctl status newsdaily-check-credentials.service --no-pager
 | `model_provider` | 当前选择的供应商，只能是 `deepseek`、`openai` 或 `qwen`。 |
 | `model_profiles.<provider>.model` | 该供应商实际调用的模型标识。 |
 | `model_profiles.<provider>.context_tokens` | 该模型可修改的上下文 token 限制；实际输入与输出必须能容纳在上下文窗口内。 |
-| `model_profiles.<provider>.max_output_tokens` | 单次模型请求可修改的最大输出 token 限制；达到限制可能导致无法形成有效日报，应用应依校验结果停止。 |
+| `model_profiles.<provider>.max_output_tokens` | 单次模型请求可修改的最大输出 token 限制；输出截断时尽量保留前面完整、合格的事件；没有任何可用事件才停止。 |
 | `model_profiles.<provider>.timeout_seconds` | 模型 API 请求超时秒数。 |
 
 现行代码不再包含计费预算限制、价格配置或基于价格的预检/估价；只按输入、输出及上下文 token 限制模型请求。Qwen 不需要价格字段。DeepSeek、OpenAI、Qwen 三种模型仍可选；切换 `model_provider` 后应录入对应供应商凭据并做凭据检查。API 实际是否计费仍取决于供应商账户与其当前政策，token 限制不是费用承诺。
@@ -190,7 +190,7 @@ sudo journalctl -u newsdaily-preview.service -n 80 --no-pager
 sudo -u newsdaily /bin/sh -c 'cd /opt/newsdaily && ls -lt output/digest-full-*.html'
 ```
 
-上述真实预览命令不发送邮件。检查 `output/` 下 HTML/TXT、`coverage-report.json`、`full-collection-status.json` 及运行报告中的日期、来源、证据、覆盖率和正文；质量门槛未达成时不应绕过校验发送。预览文件和数据库均含业务资料，应限制读取并纳入受控备份。
+上述真实预览命令不发送邮件。模型只调用一次；对不合格式、引用无法核对、译题缺失或重复的事件逐条剔除，不会为了凑满目标条数或标题相似的交叉信源候选再次调用模型。交叉印证不足的 `supported` 断言会降为单一信源；只有零条可用事件、无完整 JSON 事件、模型 API/采集等基础故障才停止生成。检查 `output/` 下 HTML/TXT、`coverage-report.json`、`full-collection-status.json` 与 `full-model-recovery-audit.json`，后者记录剔除原因、截断恢复和未覆盖的交叉信源候选。日报仅供快速了解，不应将入选视为人工事实核查。预览文件和数据库均含业务资料，应限制读取并纳入受控备份。
 
 ## 手工测试发信
 
