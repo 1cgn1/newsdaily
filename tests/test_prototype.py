@@ -1,10 +1,17 @@
+import unittest
+
 from app.sample import sample_articles, sample_events
-from app.validation import validate_event
+from app.render import render_digest
 
-def test_event_references_are_valid():
-    ids={a["id"] for a in sample_articles()}
-    assert all(validate_event(e,ids).ok for e in sample_events())
+class PrototypeRenderTests(unittest.TestCase):
+    def test_sample_events_render(self):
+        self.assertTrue(sample_articles())
+        _,(html_body,text_body)=render_digest(sample_events(),"2026-09-25","08:00","离线样例")
+        self.assertIn("<html",html_body.lower())
+        self.assertTrue(text_body)
 
-def test_invalid_reference_rejected():
-    e=sample_events()[0].copy(); e["claims"]= [{"text":"bad","supporting_article_ids":["not-real"]}]
-    assert not validate_event(e,{"art-reuters-001"}).ok
+    def test_unmatched_reference_does_not_block_render(self):
+        event=sample_events()[0].copy()
+        event["claims"]=[{"text":"bad","supporting_article_ids":["not-real"]}]
+        _,(html_body,_)=render_digest([event],"2026-09-25","08:00","离线样例")
+        self.assertIn("bad",html_body)

@@ -1,4 +1,4 @@
-"""Bind a reviewed digest to one recipient without storing the address."""
+"""Bind a digest to one recipient without storing the address."""
 from __future__ import annotations
 
 import hashlib

@@ -122,7 +122,8 @@ if [[ "$INSTALL_MODE" == enable-timer ]]; then
         exit 0
     fi
     printf 'This enables real daily email delivery at 08:00 Asia/Shanghai.\n'
-    read -r -p 'After reviewing a successful preflight and test email, type ENABLE to proceed: ' confirmation
+    printf 'Persistent catch-up may start one run immediately if a scheduled time was missed.\n'
+    read -r -p 'Type ENABLE to activate automatic delivery: ' confirmation
     [[ "$confirmation" == ENABLE ]] || { printf 'Timer remains disabled.\n'; exit 1; }
     if systemctl is-enabled --quiet newsdaily-preview.timer; then
         systemctl disable --now newsdaily-preview.timer
@@ -185,5 +186,6 @@ fi
 runuser -u newsdaily -- "$PROJECT_DIR/.venv/bin/python" -B -m app.cli init-db
 runuser -u newsdaily -- "$PROJECT_DIR/.venv/bin/python" -B -m app.cli status
 
-printf '\nInstallation complete. No timer was enabled or started.\n'
-printf 'Enter root-only credentials, then run: sudo bash %s --check\n' "$PROJECT_DIR/scripts/install_debian13.sh"
+printf '\nInstallation complete. Existing timer state was not changed.\n'
+printf 'Enter root-only credentials, then run --check and --enable-timer to activate daily delivery.\n'
+printf 'Installer: sudo bash %s\n' "$PROJECT_DIR/scripts/install_debian13.sh"

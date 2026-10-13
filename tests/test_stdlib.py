@@ -6,11 +6,9 @@ from email import policy
 from email.parser import BytesParser
 from datetime import datetime, timezone, timedelta
 from unittest.mock import patch
-from app.sample import sample_articles, sample_events
-from app.validation import validate_event
 from app.collector import PageParser, discover_links, normalize_url, deduplicate_articles, within_window, extract_article
 from app.render import _safe_url, render_digest
-from app.pipeline import _parse_events, _check_token_limit, _model_profile, _select_diverse_articles, estimate_tokens, _rough_cluster_articles, _cross_source_candidates, _model_payload, _salvage_valid_drafts, _recover_events
+from app.pipeline import _present_model_response, _check_token_limit, _model_profile, _select_diverse_articles, estimate_tokens, _rough_cluster_articles, _model_payload
 from app.delivery import FileMailer
 from app.storage import Database
 from app.clock import BEIJING_TZ
@@ -33,16 +31,8 @@ class PrototypeTests(unittest.TestCase):
             finally:
                 first.close(); second.close()
 
-    def test_all_sample_claims_have_real_sources(self):
-        ids={a["id"] for a in sample_articles()}
-        self.assertTrue(all(validate_event(e,ids).ok for e in sample_events()))
 
-    def test_unknown_reference_is_rejected(self):
-        event={"event_id":"x","summary":"x","claims":[{"text":"x","supporting_article_ids":["missing"]}]}
-        self.assertFalse(validate_event(event,{"known"}).ok)
 
-    def test_event_without_claims_is_rejected(self):
-        self.assertFalse(validate_event({"event_id":"x","title":"x","summary":"x","claims":[]},{"a"}).ok)
 
     def test_discovery_keeps_same_site_articles(self):
         p=PageParser(); p.feed('<a href="/2026/09/24/a-long-story-slug">A sufficiently descriptive news headline</a><a href="https://evil.test/2026/story">External headline is long enough</a>')
@@ -90,32 +80,8 @@ class PrototypeTests(unittest.TestCase):
         self.assertEqual(article["published_at"],"2026-09-24T00:00:00+00:00")
         self.assertEqual(article["content_level"],"full")
 
-    def test_claim_requires_verbatim_evidence_and_translation(self):
-        article={"id":"a1","source_id":"s","source_name":"News","language":"en","title":"Article headline","original_title":"Article headline","published_at":"2026-09-24T00:00:00+00:00","content_level":"full","url":"https://news.test/2026/story","body":"Officials announced a new regional plan after a two-day meeting."}
-        response={"choices":[{"message":{"content":'{"events":[{"event_id":"e1","title":"计划公布","category":"世界","summary":"官员公布区域计划。","claims":[{"text":"官员公布了计划。","supporting_article_ids":["a1"],"evidence":[{"article_id":"a1","quote":"Officials announced a new regional plan"}],"attribution":"媒体报道","status":"single_source"}],"differences":[],"uncertainty":"仍待核实","translations":[{"article_id":"a1","title_zh":"区域计划公布","excerpt_zh":"官员在两天会议后宣布新的区域计划。"}]}]}'}}]}
-        events,_=_parse_events(response,[article])
-        self.assertEqual(len(events),1)
-        self.assertEqual(events[0]["title"],"区域计划公布")
-        self.assertEqual(events[0]["title_language"],"en")
-        response["choices"][0]["message"]["content"]=response["choices"][0]["message"]["content"].replace("Officials announced a new regional plan","Invented text fragment")
-        with self.assertRaises(RuntimeError): _parse_events(response,[article])
 
-    def test_two_articles_from_one_medium_are_not_independent_sources(self):
-        first={"id":"a1","source_id":"bbc","source_name":"BBC News","language":"en","title":"First headline","original_title":"First headline","published_at":"2026-09-24T00:00:00+00:00","content_level":"full","url":"https://news.test/one","body":"Officials announced a new regional plan after a two-day meeting.","syndication_key":"one"}
-        second={**first,"id":"a2","title":"Second headline","original_title":"Second headline","url":"https://news.test/two","syndication_key":"two"}
-        event={"event_id":"e1","lead_article_id":"a1","summary":"官员公布了计划。","claims":[{"text":"官员公布了计划。","supporting_article_ids":["a1","a2"],"evidence":[{"article_id":"a1","quote":"Officials announced a new regional plan"}],"attribution":"BBC News","status":"supported"}],"differences":[],"uncertainty":"具体细节尚待确认。","translations":[{"article_id":"a1","title_zh":"第一篇中文译题"},{"article_id":"a2","title_zh":"第二篇中文译题"}]}
-        response={"choices":[{"message":{"content":__import__("json").dumps({"events":[event]})}}]}
-        events,_=_parse_events(response,[first,second])
-        self.assertEqual(events[0]["claims"][0]["status"],"single_source")
-        self.assertIn("同一家媒体",events[0]["uncertainty"])
 
-    def test_ap_reprints_across_publishers_share_one_source_group(self):
-        first={"id":"ap1","source_id":"pbs","source_name":"PBS News","source_group":"wire:associated-press","language":"en","title":"First headline","original_title":"First headline","published_at":"2026-09-24T00:00:00+00:00","content_level":"full","url":"https://pbs.test/story","body":"Officials announced a new regional plan after a two-day meeting.","syndication_key":"wire:ap:title-a"}
-        second={**first,"id":"ap2","source_id":"mainichi","source_name":"The Mainichi","url":"https://mainichi.test/story","syndication_key":"wire:ap:title-b"}
-        event={"event_id":"e1","lead_article_id":"ap1","summary":"Officials announced a regional plan.","claims":[{"text":"Officials announced a regional plan.","supporting_article_ids":["ap1","ap2"],"evidence":[{"article_id":"ap1","quote":"Officials announced a new regional plan"}],"attribution":"wire report","status":"supported"}],"differences":[],"uncertainty":"","translations":[{"article_id":"ap1","title_zh":"第一篇标题"},{"article_id":"ap2","title_zh":"第二篇标题"}]}
-        response={"choices":[{"message":{"content":__import__("json").dumps({"events":[event]},ensure_ascii=False)}}]}
-        events,_=_parse_events(response,[first,second])
-        self.assertEqual(events[0]["claims"][0]["status"],"single_source")
 
     def test_configurable_rough_token_limit(self):
         settings={"max_input_tokens":50,"input_estimate_safety_factor":1.25}
@@ -151,111 +117,44 @@ class PrototypeTests(unittest.TestCase):
         payload=_model_payload([])
         requirements=" ".join(payload["requirements"])
         self.assertIn("目标选择15至30",requirements)
-        self.assertIn("优先纳入有不同媒体",requirements)
-        self.assertIn("可以少于目标下限",requirements)
+        self.assertIn("独立媒体交叉报道",requirements)
         self.assertNotIn("材料不足时宁可少选",requirements)
 
-    def test_strict_parser_can_still_enforce_explicit_count_for_callers(self):
-        response={"choices":[{"message":{"content":json.dumps({"events":[]})}}]}
-        with self.assertRaisesRegex(RuntimeError,"below minimum 15"):
-            _parse_events(response,[],event_min=15,event_max=30)
-        response["choices"][0]["message"]["content"]=json.dumps({"events":[{}]*31})
-        with self.assertRaisesRegex(RuntimeError,"exceeds 30"):
-            _parse_events(response,[],event_min=15,event_max=30)
+    def test_every_malformed_event_is_displayed_without_item_checks(self):
+        article={"id":"art-long-identifier-123","source_name":"示例媒体","language":"zh","original_title":"原标题","url":"https://news.test/story","content_level":"full"}
+        bad={"event_id":"duplicate","lead_article_id":"art-long","title":"问题条目","summary":"art- 中文对照","claims":[{"text":"引文不在正文中","supporting_article_ids":["unknown"],"status":"supported"}],"differences":[{"text":"未证实差异","article_ids":["unknown"]}]}
+        response={"choices":[{"message":{"content":json.dumps({"events":[bad,bad,{},"纯文本条目"]},ensure_ascii=False)}}]}
+        events,report=_present_model_response(response,[article],30)
+        self.assertEqual(len(events),4)
+        self.assertFalse(report["raw_fallback"])
+        self.assertEqual(events[0]["sources"][0]["url"],article["url"])
+        _,(html_body,text_body)=render_digest(events,"2026-10-13","08:00","测试")
+        self.assertIn("问题条目",html_body)
+        self.assertIn("art- 中文对照",text_body)
+        self.assertIn("纯文本条目",text_body)
 
-    def test_repeated_lead_cannot_pad_event_minimum(self):
-        article={"id":"a1","source_id":"one","source_name":"媒体","language":"zh","title":"同一事件","original_title":"同一事件","url":"https://one.test/story","body":"官员公布了新的协议，双方将继续谈判。"}
-        event={"event_id":"e1","lead_article_id":"a1","summary":"双方公布协议。","claims":[{"text":"双方公布协议。","supporting_article_ids":["a1"],"evidence":[{"article_id":"a1","quote":"官员公布了新的协议，双方将继续谈判。"}],"attribution":"媒体","status":"single_source"}],"differences":[],"uncertainty":"细节待确认。"}
-        response={"choices":[{"message":{"content":json.dumps({"events":[event,{**event,"event_id":"e2"}]},ensure_ascii=False)}}]}
-        with self.assertRaisesRegex(RuntimeError,"repeats a lead article"):
-            _parse_events(response,[article])
+    def test_nonempty_unparseable_response_is_rendered_verbatim(self):
+        raw="新闻原文：art- 中文对照 <未完成的 JSON"
+        events,report=_present_model_response({"choices":[{"finish_reason":"length","message":{"content":raw}}]},[],30)
+        self.assertTrue(report["raw_fallback"])
+        _,(html_body,text_body)=render_digest(events,"2026-10-13","08:00","测试")
+        self.assertIn("模型原始内容",html_body)
+        self.assertIn(raw,text_body)
 
-    def test_invalid_draft_does_not_discard_individually_valid_events(self):
-        articles=[{"id":aid,"source_id":source,"source_name":source,"language":"zh","title":title,"original_title":title,"url":f"https://{source}.test/story","body":"官员公布了新的协议，双方将继续谈判。"} for aid,source,title in (("a1","one","第一事件"),("a2","two","第二事件"),("a3","three","第三事件"))]
-        def draft(aid,eid,quote="官员公布了新的协议，双方将继续谈判。"):
-            return {"event_id":eid,"lead_article_id":aid,"summary":"双方公布协议。","claims":[{"text":"双方公布协议。","supporting_article_ids":[aid],"evidence":[{"article_id":aid,"quote":quote}],"attribution":"媒体","status":"single_source"}],"differences":[],"uncertainty":"细节待确认。"}
-        response={"choices":[{"message":{"content":json.dumps({"events":[draft("a1","e1"),draft("a2","e2","编造的原文引句不在文章正文中"),draft("a3","e3")]},ensure_ascii=False)},"finish_reason":"stop"}],"usage":{"prompt_tokens":100,"completion_tokens":50}}
-        valid,rejected=_salvage_valid_drafts(response,articles,30)
-        self.assertEqual([event["event_id"] for event in valid],["e1","e3"])
-        self.assertEqual(len(rejected),1)
-        with tempfile.TemporaryDirectory(dir=".") as directory, patch("app.pipeline._event_limits",return_value=(2,3)):
-            combined,events,audit=_recover_events(response,articles,[],None,{},directory,1,[response])
-            self.assertEqual(len(events),2)
-            self.assertEqual(audit["repair_calls"],0)
-            self.assertEqual(combined["usage"]["total_tokens"],150)
+    def test_complete_prefix_is_rendered_even_when_tail_truncated(self):
+        raw='{"events":[{"summary":"第一条"},{"summary":"第二条"},{"summary":'
+        events,report=_present_model_response({"choices":[{"finish_reason":"length","message":{"content":raw}}]},[],30)
+        self.assertEqual(len(events),2)
+        self.assertFalse(report["raw_fallback"])
+        self.assertEqual(events[1]["summary"],"第二条")
 
-    def test_invalid_event_is_dropped_without_another_model_call(self):
-        articles=[{"id":aid,"source_id":source,"source_name":source,"language":"zh","title":title,"original_title":title,"url":f"https://{source}.test/story","body":"官员公布了新的协议，双方将继续谈判。"} for aid,source,title in (("a1","one","第一事件"),("a2","two","第二事件"))]
-        def draft(aid,eid,quote):
-            return {"event_id":eid,"lead_article_id":aid,"summary":"双方公布协议。","claims":[{"text":"双方公布协议。","supporting_article_ids":[aid],"evidence":[{"article_id":aid,"quote":quote}],"attribution":"媒体","status":"single_source"}],"differences":[],"uncertainty":"细节待确认。"}
-        original={"choices":[{"message":{"content":json.dumps({"events":[draft("a1","e1","官员公布了新的协议，双方将继续谈判。"),draft("a2","e2","原文中不存在的引句不能通过校验")]},ensure_ascii=False)},"finish_reason":"stop"}],"usage":{"prompt_tokens":100,"completion_tokens":50}}
-        class FakeClient:
-            def complete(self,payload,max_tokens):
-                self.fail("repair call must not be made")
-        settings={"model_provider":"deepseek","model_profiles":{"deepseek":{"max_output_tokens":16000,"context_tokens":1000000}},"max_input_tokens":240000}
-        with tempfile.TemporaryDirectory(dir=".") as directory, patch("app.pipeline._event_limits",return_value=(2,3)), patch("app.pipeline._persist_usage"):
-            combined,events,audit=_recover_events(original,articles,[],FakeClient(),settings,directory,1,[original])
-            self.assertEqual(len(events),1)
-            self.assertEqual(audit["repair_calls"],0)
-            self.assertEqual(len(audit["rejected"]),1)
-            self.assertFalse(Path(directory,"full-model-repair-1-1.json").exists())
 
-    def test_below_target_and_missing_cross_source_candidate_do_not_block_digest(self):
-        article={"id":"a1","source_id":"one","source_name":"媒体","language":"zh","title":"有效事件","original_title":"有效事件","url":"https://one.test/story","body":"官员公布了新的协议，双方将继续谈判。"}
-        event={"event_id":"e1","lead_article_id":"a1","summary":"双方公布协议。","claims":[{"text":"双方公布协议。","supporting_article_ids":["a1"],"evidence":[{"article_id":"a1","quote":"官员公布了新的协议，双方将继续谈判。"}],"attribution":"媒体","status":"single_source"}],"differences":[],"uncertainty":"细节待确认。"}
-        response={"choices":[{"message":{"content":json.dumps({"events":[event]},ensure_ascii=False)},"finish_reason":"stop"}],"usage":{"prompt_tokens":10,"completion_tokens":20}}
-        candidate={"cluster_id":"rough-1","article_ids":["a1","a2"],"source_ids":["one","two"]}
-        with patch("app.pipeline._event_limits",return_value=(15,30)):
-            combined,events,audit=_recover_events(response,[article],[candidate],None,{},"unused",1,[response])
-        self.assertEqual(len(events),1)
-        self.assertEqual(audit["cross_source_title_candidates_not_covered"],["rough-1"])
-        self.assertEqual(audit["repair_calls"],0)
-        self.assertEqual(combined["usage"]["total_tokens"],30)
 
-    def test_truncated_tail_keeps_complete_event_without_repair(self):
-        article={"id":"a1","source_id":"one","source_name":"媒体","language":"zh","title":"有效事件","original_title":"有效事件","url":"https://one.test/story","body":"官员公布了新的协议，双方将继续谈判。"}
-        event={"event_id":"e1","lead_article_id":"a1","summary":"双方公布协议。","claims":[{"text":"双方公布协议。","supporting_article_ids":["a1"],"evidence":[{"article_id":"a1","quote":"官员公布了新的协议，双方将继续谈判。"}],"attribution":"媒体","status":"single_source"}],"differences":[],"uncertainty":"细节待确认。"}
-        raw='{"events":['+json.dumps(event,ensure_ascii=False)+',{"event_id":"partial"'
-        response={"choices":[{"message":{"content":raw},"finish_reason":"length"}]}
-        with patch("app.pipeline._event_limits",return_value=(15,30)):
-            _,events,audit=_recover_events(response,[article],[],None,{},"unused",1,[response])
-        self.assertEqual(len(events),1)
-        self.assertTrue(audit["truncated_prefix_recovered"])
-        self.assertEqual(audit["repair_calls"],0)
 
-    def test_overlong_model_list_keeps_model_order_without_extra_call(self):
-        articles=[{"id":aid,"source_id":source,"source_name":source,"source_group":source,"language":"zh","title":title,"original_title":title,"url":f"https://{source}.test/story","body":"官员公布了新的协议，双方将继续谈判。"} for aid,source,title in (("a1","one","第一事件"),("a2","two","第二事件"),("a3","three","第三事件"))]
-        def claim(ids,status):
-            return {"text":"双方公布协议。","supporting_article_ids":ids,"evidence":[{"article_id":aid,"quote":"官员公布了新的协议，双方将继续谈判。"} for aid in ids],"attribution":"媒体","status":status}
-        drafts=[{"event_id":"e1","lead_article_id":"a1","summary":"第一事件。","claims":[claim(["a1"],"single_source")],"differences":[],"uncertainty":"细节待确认。"},{"event_id":"e2","lead_article_id":"a2","summary":"第二事件。","claims":[claim(["a2"],"single_source")],"differences":[],"uncertainty":"细节待确认。"},{"event_id":"e3","lead_article_id":"a3","summary":"第三事件。","claims":[claim(["a2","a3"],"supported")],"differences":[],"uncertainty":"细节待确认。"}]
-        response={"choices":[{"message":{"content":json.dumps({"events":drafts},ensure_ascii=False)},"finish_reason":"stop"}]}
-        valid,rejected=_salvage_valid_drafts(response,articles,2)
-        self.assertEqual((len(valid),len(rejected)),(3,0))
-        candidate={"cluster_id":"rough-1","article_ids":["a2","a3"],"source_ids":["two","three"]}
-        with patch("app.pipeline._event_limits",return_value=(2,2)):
-            _,events,audit=_recover_events(response,articles,[candidate],None,{},"unused",1,[response])
-        self.assertEqual([event["event_id"] for event in events],["e1","e2"])
-        self.assertEqual(audit["valid_excluded_by_event_cap"],1)
-        self.assertEqual(audit["cross_source_title_candidates_not_covered"],["rough-1"])
 
-    def test_cross_source_candidate_needs_independent_evidence(self):
-        articles=[{"id":aid,"source_id":source,"source_name":source,"source_group":source,"language":"zh","title":"同一事件","original_title":"同一事件","url":f"https://{source}.test/story","body":"官员公布了新的协议，双方将继续谈判。"} for aid,source in (("a1","one"),("a2","two"))]
-        candidates=_cross_source_candidates([{"article_id":a["id"],"source_id":a["source_id"],"source_group":a["source_group"],"rough_cluster_id":"rough-1"} for a in articles])
-        self.assertEqual(len(candidates),1)
-        claim={"text":"双方公布协议。","supporting_article_ids":["a1","a2"],"evidence":[{"article_id":"a1","quote":"官员公布了新的协议，双方将继续谈判。"},{"article_id":"a2","quote":"官员公布了新的协议，双方将继续谈判。"}],"attribution":"两家媒体","status":"supported"}
-        event={"event_id":"e1","lead_article_id":"a1","summary":"双方公布协议。","claims":[claim],"differences":[],"uncertainty":"细节待确认。"}
-        response={"choices":[{"message":{"content":json.dumps({"events":[event]},ensure_ascii=False)}}]}
-        events,_=_parse_events(response,articles,required_cross_source=candidates)
-        self.assertEqual(len(events),1)
-        claim["evidence"].pop()
-        response["choices"][0]["message"]["content"]=json.dumps({"events":[event]},ensure_ascii=False)
-        with self.assertRaisesRegex(RuntimeError,"every cited article"):
-            _parse_events(response,articles,required_cross_source=candidates)
-        claim["supporting_article_ids"]=["a1"]
-        claim["status"]="single_source"
-        response["choices"][0]["message"]["content"]=json.dumps({"events":[event]},ensure_ascii=False)
-        with self.assertRaisesRegex(RuntimeError,"cross-source candidate"):
-            _parse_events(response,articles,required_cross_source=candidates)
+
+
+
 
     def test_token_estimate_uses_requested_character_rates(self):
         self.assertAlmostEqual(estimate_tokens("ab中文"),1.8)

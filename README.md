@@ -22,6 +22,20 @@ cd /opt/newsdaily
 sudo bash scripts/install_debian13.sh
 ```
 
+## 已部署 VPS 更新源码
+
+更新前确认没有正在运行的正式发送服务。下方命令从 GitHub 获取新版源码，重新安装锁定依赖与 systemd 单元，检查凭据，并显示正式定时器状态。安装脚本不会改变已经启用或停用的 timer；如最后显示 `disabled`，需按后文“启用每日 08:00 正式自动发送”单独启用。
+
+```bash
+sudo systemctl status newsdaily-send.service --no-pager
+cd /opt/newsdaily
+sudo git pull --ff-only
+sudo bash scripts/install_debian13.sh
+sudo bash scripts/install_debian13.sh --check
+systemctl is-enabled newsdaily-send.timer
+systemctl list-timers newsdaily-send.timer
+```
+
 ## 手工分步安装
 
 以下各步可替代一键安装。下方命令安装系统依赖、创建服务账号和目录、建立 venv、安装锁定依赖并检查依赖一致性：
@@ -87,7 +101,7 @@ sudo systemctl status newsdaily-check-credentials.service --no-pager
 | `timezone` | 预留说明字段；目前日报日期由代码固定按北京时间计算，改此字段不会改变时区。 |
 | `daily_send_hour` | 预留说明字段；当前定时发送时间由 `systemd/newsdaily-send.timer` 的 `OnCalendar` 决定，改此字段不会更改 timer。 |
 | `article_window_hours` | 纳入日报的新闻发布时间回溯窗口（小时）。 |
-| `daily_event_target_min` / `daily_event_target_max` | 每日报告目标事件数下限/展示上限。下限是给模型的目标，不再是发送门槛；只要至少一条事件通过逐条校验便可生成，上限之外的有效事件不展示。 |
+| `daily_event_target_min` / `daily_event_target_max` | 给模型的目标条数下限/日报展示上限。模型返回内容不因逐条校验而被剔除；超过展示上限时只展示前面的条目。 |
 | `retention_articles_days` | 预留字段；当前没有自动清理文章的任务，改此值不会删除记录。 |
 | `retention_digest_days` | 预留字段；当前没有自动清理日报的任务，改此值不会删除记录。 |
 | `max_input_tokens` | 可修改的模型输入 token 限制，用于控制提交给模型的输入规模。 |
@@ -95,7 +109,7 @@ sudo systemctl status newsdaily-check-credentials.service --no-pager
 | `model_provider` | 当前选择的供应商，只能是 `deepseek`、`openai` 或 `qwen`。 |
 | `model_profiles.<provider>.model` | 该供应商实际调用的模型标识。 |
 | `model_profiles.<provider>.context_tokens` | 该模型可修改的上下文 token 限制；实际输入与输出必须能容纳在上下文窗口内。 |
-| `model_profiles.<provider>.max_output_tokens` | 单次模型请求可修改的最大输出 token 限制；输出截断时尽量保留前面完整、合格的事件；没有任何可用事件才停止。 |
+| `model_profiles.<provider>.max_output_tokens` | 单次模型请求可修改的最大输出 token 限制；输出截断时展示前面完整的事件，没有完整事件时展示模型原文。 |
 | `model_profiles.<provider>.timeout_seconds` | 模型 API 请求超时秒数。 |
 
 现行代码不再包含计费预算限制、价格配置或基于价格的预检/估价；只按输入、输出及上下文 token 限制模型请求。Qwen 不需要价格字段。DeepSeek、OpenAI、Qwen 三种模型仍可选；切换 `model_provider` 后应录入对应供应商凭据并做凭据检查。API 实际是否计费仍取决于供应商账户与其当前政策，token 限制不是费用承诺。
@@ -190,23 +204,23 @@ sudo journalctl -u newsdaily-preview.service -n 80 --no-pager
 sudo -u newsdaily /bin/sh -c 'cd /opt/newsdaily && ls -lt output/digest-full-*.html'
 ```
 
-上述真实预览命令不发送邮件。模型只调用一次；对不合格式、引用无法核对、译题缺失或重复的事件逐条剔除，不会为了凑满目标条数或标题相似的交叉信源候选再次调用模型。交叉印证不足的 `supported` 断言会降为单一信源；只有零条可用事件、无完整 JSON 事件、模型 API/采集等基础故障才停止生成。检查 `output/` 下 HTML/TXT、`coverage-report.json`、`full-collection-status.json` 与 `full-model-recovery-audit.json`，后者记录剔除原因、截断恢复和未覆盖的交叉信源候选。日报仅供快速了解，不应将入选视为人工事实核查。预览文件和数据库均含业务资料，应限制读取并纳入受控备份。
+上述真实预览命令不发送邮件。模型只调用一次；日报不做逐条引文、ID、译题、去重或 HTML 文本内容拦截。模型返回非空内容时，能解析的事件按原顺序展示；JSON 或事件结构不完整时展示可取得的完整事件，必要时直接展示模型原文。`full-model-format-report.json` 记录展示条数和原文回退情况。检查 `output/` 下 HTML/TXT、`coverage-report.json`、`full-collection-status.json` 和格式报告。日报仅供快速了解，内容可能有错误，不应将入选视为事实核查；预览文件和数据库均含业务资料，应限制读取并纳入受控备份。
 
-## 手工测试发信
+## 可选：手工测试发信
 
-只有安全检查通过且人工审阅当日真实预览后，才进行一次真实测试投递。将命令中的日期换成当前北京时间 `YYYY-MM-DD` 格式；这是实际发信操作，会投递到录入的收件邮箱。下方命令发送并查看结果：
+下方命令会重新采集、调用模型、生成日报并真实发送到已配置邮箱；它不依赖此前的仅预览结果。仅在需要手工验证投递时执行，且同一天已发送或结果不明的日报不会重复发送：
 
 ```bash
-sudo systemctl start newsdaily-send@full-YYYY-MM-DD.service
-sudo systemctl status newsdaily-send@full-YYYY-MM-DD.service --no-pager
-sudo journalctl -u newsdaily-send@full-YYYY-MM-DD.service -n 30 --no-pager
+sudo systemctl start newsdaily-send.service
+sudo systemctl status newsdaily-send.service --no-pager
+sudo journalctl -u newsdaily-send.service -n 30 --no-pager
 ```
 
-上述命令只允许发送当日已生成且未发送的完整日报，并核对收件人绑定等条件。若 SMTP 结果不确定，不要自动重发；先核对收件箱、服务日志和邮件服务端投递记录。
+上述命令会产生实际模型调用与邮件投递。若 SMTP 结果不确定，不要自动重发；先核对收件箱、服务日志和邮件服务端投递记录。
 
 ## 启用每日 08:00 正式自动发送
 
-正式发送 timer 默认禁用。先完成数据库初始化、凭据检查、真实预览审阅和手工测试邮件，再由管理员明确批准正式每日投递。下方命令执行预检并启用 timer；脚本会要求现场输入 `ENABLE` 二次确认，若预览 timer 已启用则先停用它：
+正式发送 timer 在安装后默认禁用，必须显式启用，否则每天不会自动发邮件。完成数据库初始化和凭据检查后，下方命令执行预检并启用 timer；脚本会要求输入 `ENABLE`，若预览 timer 已启用则先停用它：
 
 ```bash
 cd /opt/newsdaily
@@ -214,9 +228,9 @@ sudo bash scripts/install_debian13.sh --enable-timer
 systemctl list-timers newsdaily-send.timer
 ```
 
-上述启用命令配置为每日北京时间 08:00 运行 `full-run --send`。若系统停机错过触发时间，`Persistent=true` 会在恢复后补跑。
+上述启用命令配置为每日北京时间 08:00 运行 `full-run --send`。若错过计划时间，补跑机制可能在启用 timer 后立即触发一次真实采集和发信。
 
-若一键脚本无法使用，且已完成上文的凭据检查、真实预览审阅和一次测试邮件，可由管理员手工启用正式 timer。**下方命令会开始每日真实投递**；它先关闭旧预览 timer，再启用正式 timer。不要在未确认收件人和测试结果时执行：
+若一键脚本无法使用，且已完成凭据检查，可由管理员手工启用正式 timer。**下方命令会开始每日真实投递，也可能立即补跑**；它先关闭旧预览 timer，再启用正式 timer。执行前确认收件邮箱正确：
 
 ```bash
 sudo systemctl disable --now newsdaily-preview.timer
